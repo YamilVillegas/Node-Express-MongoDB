@@ -9,13 +9,14 @@ router.get('/', function(req, res, next) {
 });
 
 router.post('/signup', (req, res, next) => {
-    User.findOne({username: req.body.username})
+    User.findOne({username: req.body.username}) 
+    //Checks to see if any other users have that name
     .then(user => {
         if (user) {
             const err = new Error(`User ${req.body.username} already exists!`);
             err.status = 403;
-            return next(err);
-        } else {
+            return next(err); // Taken thus error
+        } else { // Else create name and password
             User.create({
                 username: req.body.username,
                 password: req.body.password})
@@ -72,8 +73,8 @@ router.post('/login', (req, res, next) => {
 
 router.get('/logout', (req, res, next) => {
     if (req.session) {
-        req.session.destroy();
-        res.clearCookie('session-id');
+        req.session.destroy(); // Deleting session from the server side
+        res.clearCookie('session-id'); // Clears cookie saved
         res.redirect('/');
     } else {
         const err = new Error('You are not logged in!');
@@ -83,3 +84,5 @@ router.get('/logout', (req, res, next) => {
 });
 
 module.exports = router;
+
+// Added user signup, user log in and user log out
