@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
+const passport = require('passport');
+const authenticate = require('./authenticate');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -44,6 +46,9 @@ app.use(session({
   resave: false, // Resaves whenever a user makes a request 
   store: new FileStore()
 }));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 function auth(req, res, next) {
   console.log(req.session);
