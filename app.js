@@ -27,6 +27,15 @@ connect.then(() => console.log('Connected correctly to server'),
 
 var app = express();
 
+app.all('*', (req, res, next) => {
+  if (req.secure) {
+    return next();
+  } else {
+    console.log(`Redirecting to: http://${req.hostname}:${app.get('secPort')}${req.url}`);
+    res.redirect(301, `http://${req.hostname}:${app.get('secPort')}${req.url}`);
+  }
+}) // CAtches all requests to our server
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
