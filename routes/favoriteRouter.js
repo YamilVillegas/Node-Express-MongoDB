@@ -47,21 +47,21 @@ favoriteRouter.route('/')
     res.end('PUT operation not supported on /favorites');
 })
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    Favorite.findOneAndDelete({user: req.user._id })
-    .then(response => {
+    Favorite.findOneAndDelete({ user: req.user._id })
+    .then(favorite => {
         res.statusCode = 200;
-        if (response) {
+        if (favorite) {
             res.setHeader('Content-Type', 'application/json');
-            res.json(response);
+            res.json(favorite);
         } else {
             res.setHeader('Content-Type', 'text/plain');
-            res.end('You do not have any favorites to delete!')
+            res.end('You do not have any favorites to delete.');
         }
-    }) 
+    })
     .catch(err => next(err));
 });
 
-favoriteRouter.route('/:favoriteId')
+favoriteRouter.route('/:campsiteId')
 .options(cors.corsWithOptions, (req, res) => res.sendStatus(200))
 .get(cors.cors, (req, res, next) => {
     res.statusCode = 403;
@@ -107,21 +107,26 @@ favoriteRouter.route('/:favoriteId')
     .catch(err => next(err));
 })
 .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => {
-    Favorite.findOne({user: req.user._id }).then(favorite => {
-        res.statusCode = 200;
+    Favorite.findOne({user: req.user._id })
+    .then(favorite => {
         if (favorite) {
             const index = favorite.campsites.indexOf(req.params.campsiteId);
-            if(index >= 0) {
+            if (index >= 0) {
                 favorite.campsites.splice(index, 1);
             }
-            res.setHeader('Content-Type', 'application/json');
-            res.json(favorite);
-        }   else {
+            favorite.save()
+            .then(favorite => {
+                console.log('Favorite Campsite Deleted!', favorite);
+                res.statusCode = 200;
+                res.setHeader('Content-Type', 'application/json');
+                res.json(favorite);
+            }).catch(err => next(err));
+        } else {
+            res.statusCode = 200;
             res.setHeader('Content-Type', 'text/plain');
-            res.end('You do not have any favorites to delete!')
+            res.end('You do not have any favorites to delete.');
         }
-    }) 
-    .catch(err => next(err));
+    }).catch(err => next(err))
 });
 
 module.exports = favoriteRouter;
